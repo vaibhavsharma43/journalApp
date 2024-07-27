@@ -2,28 +2,48 @@ package com.vaibhav.journalapp.ServiceImp;
 
 
 import com.vaibhav.journalapp.Repository.JournalEntryRepository;
+import com.vaibhav.journalapp.Repository.UserRepository;
 import com.vaibhav.journalapp.Service.JournalEntryService;
+import com.vaibhav.journalapp.Service.UserService;
 import com.vaibhav.journalapp.entity.JournalEntry;
+import com.vaibhav.journalapp.entity.User;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
 @Service
-public class JournalEntryImp  implements JournalEntryService {
+public class JournalEntryImp implements JournalEntryService {
 
     @Autowired
     private JournalEntryRepository journalEntryRepository;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
-    public boolean createEntry(JournalEntry journalEntry) {
-        try{
-            journalEntryRepository.save(journalEntry);
+    @Transactional
+    public boolean createEntry(JournalEntry journalEntry, String userName) {
+        try {
+            User user = userService.findByUsername(userName);
+
+            journalEntry.setDate(LocalDateTime.now());
+            JournalEntry saved = journalEntryRepository.save(journalEntry);
+            user.getJournalEntries().add(saved);
+
+            userService.saveUser(user);
+
             return true;
-        }catch (Exception e){
-            return  false;
+        } catch (Exception e) {
+            throw new RuntimeException("An error occurred while creating journal entry",e);
+
         }
     }
+
 
     @Override
     public List<JournalEntry> getAllJournalEntriesOfUser() {
@@ -37,27 +57,36 @@ public class JournalEntryImp  implements JournalEntryService {
     }
 
     @Override
-    public boolean deleteJournalEntryById(ObjectId myId) {
-        try{
-            if(journalEntryRepository.existsById(myId)){
+    public boolean deleteJournalEntryById(ObjectId myId, String userName) {
+        try {
+
+            if (journalEntryRepository.existsById(myId)) {
+                User user = userService.findByUsername(userName);
+                user.getJournalEntries().removeIf(x -> x.getId().equals(myId));
+                userService.saveUser(user);
                 journalEntryRepository.deleteById(myId);
-                return  true;
-            }else{
+                return true;
+            } else {
                 return false;
             }
 
-        }catch (Exception e){
-            return  false;
+        } catch (Exception e) {
+            return false;
         }
     }
 
     @Override
-    public boolean updateJournalById(ObjectId myId, JournalEntry newEntry) {
-        if(journalEntryRepository.existsById(myId)){
+    public boolean updateJournalById(ObjectId myId, JournalEntry newEntry, String userName) {
+        User user = userService.findByUsername(userName);
+//        if(user!=null){
+//           Future Work
+
+//        }
+        if (journalEntryRepository.existsById(myId)) {
             newEntry.setId(myId);
             journalEntryRepository.save(newEntry);
-        return  true;
-        }else{
+            return true;
+        } else {
             return false;
         }
     }
