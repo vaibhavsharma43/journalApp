@@ -10,12 +10,12 @@ import java.util.List;
 @Component
 public interface UserService {
     boolean saveUser(User user);
-
+    boolean saveExistUser(User user);
     List<User> getAll();
 
     User findById(ObjectId myId);
 
-    boolean deleteById(ObjectId myId);
+    void deleteByUserName(String userName);
 
     User findByUsername(String username);
 }

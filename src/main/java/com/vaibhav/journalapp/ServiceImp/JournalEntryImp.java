@@ -33,13 +33,14 @@ public class JournalEntryImp implements JournalEntryService {
 
             journalEntry.setDate(LocalDateTime.now());
             JournalEntry saved = journalEntryRepository.save(journalEntry);
+
             user.getJournalEntries().add(saved);
 
-            userService.saveUser(user);
+            userService.saveExistUser(user);
 
             return true;
         } catch (Exception e) {
-            throw new RuntimeException("An error occurred while creating journal entry",e);
+            throw new RuntimeException("An error occurred while creating journal entry", e);
 
         }
     }
@@ -57,21 +58,33 @@ public class JournalEntryImp implements JournalEntryService {
     }
 
     @Override
+    @Transactional
     public boolean deleteJournalEntryById(ObjectId myId, String userName) {
         try {
 
             if (journalEntryRepository.existsById(myId)) {
+
                 User user = userService.findByUsername(userName);
-                user.getJournalEntries().removeIf(x -> x.getId().equals(myId));
-                userService.saveUser(user);
-                journalEntryRepository.deleteById(myId);
-                return true;
+              boolean removed=  user.getJournalEntries().removeIf(x -> x.getId().equals(myId));
+
+                if(removed){
+
+                    userService.saveExistUser(user);
+                    journalEntryRepository.deleteById(myId);
+                    return true;
+                }else {
+
+                    return false;
+                }
+
+
             } else {
+
                 return false;
             }
 
         } catch (Exception e) {
-            return false;
+           throw new RuntimeException("An error occurred while deleting journal entry", e);
         }
     }
 
@@ -90,4 +103,5 @@ public class JournalEntryImp implements JournalEntryService {
             return false;
         }
     }
+
 }

@@ -6,8 +6,11 @@ import com.vaibhav.journalapp.Service.UserService;
 import com.vaibhav.journalapp.entity.User;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -15,9 +18,25 @@ public class UserImp implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public boolean saveUser(User user) {
+        try {
+
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+            user.setRoles(Arrays.asList("List"));
+
+            userRepository.save(user);
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    @Override
+    public boolean saveExistUser(User user) {
         try {
             userRepository.save(user);
             return true;
@@ -38,19 +57,10 @@ public class UserImp implements UserService {
     }
 
     @Override
-    public boolean deleteById(ObjectId myId) {
-        try {
-            if (userRepository.existsById(myId)) {
-                userRepository.deleteById(myId);
-                return true;
-            } else {
-                return false;
-            }
-
-        } catch (Exception e) {
-            return false;
-        }
+    public void deleteByUserName(String userName) {
+        userRepository.deleteByUserName(userName);
     }
+
 
     public User findByUsername(String username) {
         return userRepository.findByUserName(username);

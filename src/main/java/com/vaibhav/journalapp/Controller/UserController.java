@@ -1,12 +1,13 @@
 package com.vaibhav.journalapp.Controller;
 
+import com.vaibhav.journalapp.Repository.UserRepository;
 import com.vaibhav.journalapp.Service.UserService;
 import com.vaibhav.journalapp.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 
@@ -15,37 +16,32 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAll());
-    }
 
-    @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody User user) {
 
-        if (userService.saveUser(user)) {
+    @PutMapping()
+    public ResponseEntity<?> updateUser(@RequestBody User user) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
 
-            return ResponseEntity.ok("User created successfully");
-        } else {
-            return ResponseEntity.badRequest().body("User creation failed");
-        }
-    }
-
-    @PutMapping("/{userName}")
-    public ResponseEntity<?> updateUser(@RequestBody User user,@PathVariable String userName) {
         User userInDb = userService.findByUsername(userName);
-        if (userInDb != null) {
-            userInDb.setUserName(user.getUserName());
-            userInDb.setPassword(user.getPassword());
-            userService.saveUser(userInDb);
-            return ResponseEntity.ok("User updated successfully");
-        } else {
-            return ResponseEntity.badRequest().body("User update failed");
-        }
 
+        userInDb.setUserName(user.getUserName());
+        userInDb.setPassword(user.getPassword());
+        userService.saveUser(userInDb);
+        return ResponseEntity.ok("User updated successfully");
     }
 
+
+    @DeleteMapping()
+    public ResponseEntity<?> deleteUserByUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        userService.deleteByUserName(authentication.getName());
+        return ResponseEntity.ok("User deleted successfully");
+    }
 
 }
+
+
+
 
 
