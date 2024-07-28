@@ -26,7 +26,7 @@ public class UserImp implements UserService {
 
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-            user.setRoles(Arrays.asList("List"));
+
 
             userRepository.save(user);
 
