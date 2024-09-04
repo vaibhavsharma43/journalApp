@@ -1,0 +1,18 @@
+
+#spring.main.allow-circular-references=true
+#logging.level.org.springframework=DEBUG
+
+spring:
+  main:
+    allow-circular-references: true
+  data:
+    mongodb:
+      uri: mongodb+srv://sharma252003:rGUvYoEtMuD3DSSv@cluster0.kix5yip.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+
+
+      database: JournalApp
+      auto-index-creation: true
+#
+#server:
+#  servlet:
+#    context-path: /journal

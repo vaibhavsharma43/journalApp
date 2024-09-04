@@ -15,7 +15,7 @@ import java.util.List;
 public class AdminController {
     @Autowired
     UserService userService;
-    @GetMapping("all-users")
+    @GetMapping("/all-users")
     public ResponseEntity<?> getAllUsers(){
        List<User> all= userService.getAll();
        if(!all.isEmpty()){

@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,8 +27,10 @@ public class UserImp implements UserService {
 
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-
-
+            List<String> roles = new ArrayList<>();
+            roles.add("ADMIN");
+roles.add("USER");
+            user.setRoles(roles);
             userRepository.save(user);
 
             return true;
